@@ -1,45 +1,44 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const UserSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, 'Please add a name'],
-  },
   email: {
     type: String,
-    required: [true, 'Please add an email'],
+    required: true,
     unique: true,
-    match: [
-      /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-      'Please add a valid email',
-    ],
+    lowercase: true
   },
   password: {
     type: String,
-    required: [true, 'Please add a password'],
-    minlength: 6,
-    select: false,
+    required: true,
+    minlength: 6
   },
   createdAt: {
     type: Date,
-    default: Date.now,
-  },
-});
-
-// Encrypt password using bcrypt
-UserSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
-    next();
+    default: Date.now
   }
-
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
 });
 
-// Match user entered password to hashed password in database
-UserSchema.methods.matchPassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
+// Password hashing middleware
+UserSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(this.password, 12);
+  next();
+});
+
+// Generate JWT token method
+UserSchema.methods.generateAuthToken = function() {
+  return jwt.sign(
+    { user: { id: this._id } },
+    process.env.JWT_SECRET,
+    { expiresIn: '5 days' }
+  );
+};
+
+// Password comparison method
+UserSchema.methods.comparePassword = async function(candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
 };
 
 module.exports = mongoose.model('User', UserSchema);

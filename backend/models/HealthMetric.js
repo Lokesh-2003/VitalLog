@@ -2,49 +2,28 @@ const mongoose = require('mongoose');
 
 const HealthMetricSchema = new mongoose.Schema({
   user: {
-    type: mongoose.Schema.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
+    required: true
   },
-  metricType: {
+  type: {
     type: String,
-    required: [true, 'Please select a metric type'],
-    enum: [
-      'weight',
-      'blood-pressure',
-      'blood-sugar',
-      'heart-rate',
-      'cholesterol',
-      'temperature',
-    ],
+    required: true,
+    enum: ['weight', 'blood_pressure', 'blood_sugar', 'heart_rate']
   },
   value: {
-    type: Number,
-    required: [true, 'Please add a value'],
-  },
-  secondaryValue: {
-    type: Number,
-    required: function () {
-      return this.metricType === 'blood-pressure';
-    },
+    type: mongoose.Schema.Types.Mixed,
+    required: true
   },
   unit: {
     type: String,
-    required: [true, 'Please add a unit'],
-    enum: ['kg', 'lbs', 'mmHg', 'mg/dL', 'bpm', '°C', '°F'],
+    required: true
   },
-  notes: {
-    type: String,
-    maxlength: [500, 'Notes cannot be more than 500 characters'],
-  },
-  dateRecorded: {
+  recordedAt: {
     type: Date,
-    default: Date.now,
+    default: Date.now
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  notes: String
+}, { timestamps: true });
 
 module.exports = mongoose.model('HealthMetric', HealthMetricSchema);
