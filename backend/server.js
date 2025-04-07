@@ -14,9 +14,11 @@ const app = express();
 app.use(helmet());
 app.use(express.json());
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  origin: [
+    'http://localhost:3000',
+    'http://10.0.2.205:3000',
+    'https://bookish-xylophone-4j7v57qp5qw425r67-3000.app.github.dev'
+  ],
   credentials: true
 }));
 
